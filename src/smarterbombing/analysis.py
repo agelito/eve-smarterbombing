@@ -1,10 +1,21 @@
 """Analyze logs offlinee"""
-from datetime import timedelta
+from datetime import datetime, timedelta
 import pandas as pd
 from gradio import Progress
 
 from smarterbombing.logs import find_character_logs_at_date
-from smarterbombing.log_reader import read_all_combat_log_entries, open_character_logs, log_entries_to_dataframe
+from smarterbombing.log_reader import\
+    read_all_combat_log_entries,\
+    open_log_files,\
+    log_entries_to_dataframe
+
+EVENT_GROUP_ALL_DAMAGE='all_combat_events'
+EVENT_GROUP_OUTGOING_DAMAGE='outgoing_damage'
+EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE='outgoing_hostile_damage'
+EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE='outgoing_friendly_damage'
+EVENT_GROUP_INCOMING_DAMAGE='incoming_damage'
+EVENT_GROUP_INCOMING_HOSTILE_DAMAGE='incoming_hostile_damage'
+EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE='incoming_friendly_damage'
 
 def _filter_by_direction(events: pd.DataFrame, direction: str):
     filter_outgoing = events['direction'].isin([direction])
@@ -27,6 +38,26 @@ def _group_by_delta_time(events: pd.DataFrame, max_gap_seconds: float):
 
     return groups
 
+def group_damage_events(events: pd.DataFrame, characters: list[str]):
+    """Sort combat events by type and direction"""
+    outgoing_damage = _filter_by_direction(events, 'to')
+    outgoing_damage_to_friendly = _filter_friendly_damage(outgoing_damage, characters)
+    outgoing_damage_to_hostile = _filter_unfriendly_damage(outgoing_damage, characters)
+
+    incoming_damage = _filter_by_direction(events, 'from')
+    incoming_damage_from_friendly = _filter_friendly_damage(incoming_damage, characters)
+    incoming_damage_from_hostile = _filter_unfriendly_damage(incoming_damage, characters)
+
+    return {
+        EVENT_GROUP_ALL_DAMAGE: events,
+        EVENT_GROUP_OUTGOING_DAMAGE: outgoing_damage,
+        EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE: outgoing_damage_to_hostile,
+        EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE: outgoing_damage_to_friendly,
+        EVENT_GROUP_INCOMING_DAMAGE: incoming_damage,
+        EVENT_GROUP_INCOMING_HOSTILE_DAMAGE: incoming_damage_from_hostile,
+        EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE: incoming_damage_from_friendly,
+    }
+
 def parse_logs(configuration, date, progress=Progress()):
     """Parse logs collecting events and best effort split into sessions"""
 
@@ -37,7 +68,7 @@ def parse_logs(configuration, date, progress=Progress()):
     character_logs = find_character_logs_at_date(log_directory, date)
 
     progress(0.1, desc='Opening log files')
-    character_files = open_character_logs(character_logs, characters)
+    character_files = open_log_files(character_logs, characters)
 
     progress(0.2, desc='Parsing log messages')
     combat_log_entries = list(read_all_combat_log_entries(character_files))
@@ -56,23 +87,9 @@ def parse_logs(configuration, date, progress=Progress()):
             "Events": len(session.index),
         })
 
-        outgoing_damage = _filter_by_direction(session, 'to')
-        outgoing_damage_to_friendly = _filter_friendly_damage(outgoing_damage, characters)
-        outgoing_damage_to_hostile = _filter_unfriendly_damage(outgoing_damage, characters)
+        grouped_events = group_damage_events(session, characters)
 
-        incoming_damage = _filter_by_direction(session, 'from')
-        incoming_damage_from_friendly = _filter_friendly_damage(incoming_damage, characters)
-        incoming_damage_from_hostile = _filter_unfriendly_damage(incoming_damage, characters)
-
-        data.append({
-            'all_combat_events': session,
-            'outgoing_damage': outgoing_damage,
-            'outgoing_hostile_damage': outgoing_damage_to_hostile,
-            'outgoing_friendly_damage': outgoing_damage_to_friendly,
-            'incoming_damage': incoming_damage,
-            'incoming_hostile_damage': incoming_damage_from_hostile,
-            'incoming_friendly_damage': incoming_damage_from_friendly,
-        })
+        data.append(grouped_events)
 
     progress(1.0, desc='Done')
 
@@ -80,6 +97,10 @@ def parse_logs(configuration, date, progress=Progress()):
 
 def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
     """Calculate average DPS per character"""
+
+    if data.empty:
+        return data
+
     data = data[['timestamp', 'character', 'damage']]
     data = data.groupby(['timestamp', 'character']).sum().reset_index()
     data = data.pivot(
@@ -87,6 +108,7 @@ def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> 
         columns='character',
         values='damage'
     ).fillna(0.0)
+
     data = data.assign(Total=data.sum(1))
     data = data.resample('1S').asfreq(fill_value=0.0)
 
@@ -106,3 +128,6 @@ def resample_30s_mean(data: pd.DataFrame) -> pd.DataFrame:
 
     return data.resample('30S').mean()
 
+def filter_by_datetime(data: pd.DataFrame, after: datetime, until: datetime):
+    """Return rows which timestamp is within the provided datetimes"""
+    return data[(data['timestamp'] > after) & (data['timestamp'] <= until)]

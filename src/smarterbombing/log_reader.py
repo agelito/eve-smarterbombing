@@ -1,13 +1,28 @@
 """Utility to help read lines from log files"""
-import time
 import re
 from datetime import datetime
+from typing import IO
 from parse import search
 import pandas as pd
 
 CLEAN_MARKUP_REGEX = re.compile('<.*?>')
 CLEAN_TIME_AND_TYPE_REGEX = re.compile(r'^(\[\s.*\s\])[ ](\(combat\)[ ])')
 CLEAN_CORP_AND_SHIP_REGEX = re.compile(r'\[.*')
+
+class CharacterLogFile:
+    """Class representing a character name and log file handle"""
+    def __init__(self, filename: str, character: str, file: IO[any]):
+        self.filename = filename
+        self.character = character
+        self.file = file
+
+    def is_open(self) -> bool:
+        """Return boolean indicating if file is open"""
+        return not self.file.closed
+
+    def close(self):
+        """Close the file handle"""
+        self.file.close()
 
 def _parse_combat_log_line(line, character):
     parsed_line = search('[ {} ] ({})', line)
@@ -56,23 +71,34 @@ def _parse_combat_log_line(line, character):
         subject,
         what ]
 
-def _read_combat_log_with_character(character_file):
-    (character, file) = character_file
+def _read_and_parse_combat_log_lines(log: CharacterLogFile):
+    file = log.file
+    character = log.character
 
-    return _parse_combat_log_line(file.readline(), character)
-
-def _read_all_combat_log_entries(character_file):
-    (character, file) = character_file
+    parsed_lines = []
 
     for line in file.readlines():
         parsed = _parse_combat_log_line(line, character)
 
-        if parsed is None:
-            continue
+        if parsed is not None:
+            parsed_lines.append(parsed)
 
-        yield parsed
+    return parsed_lines
 
-def open_character_logs(character_logs, filter_characters):
+def _flatten(in_list):
+    return [item for ll in in_list for item in ll]
+
+def read_all_combat_log_entries(character_files: list[CharacterLogFile]):
+    """Read all combat log entries from character log files"""
+    character_log_entries = map(_read_and_parse_combat_log_lines, character_files)
+
+    return _flatten(character_log_entries)
+
+def open_log_files(
+        character_logs,
+        filter_characters,
+        seek_to_end: bool = False
+    ) -> list[CharacterLogFile]:
     """Open character log files"""
     character_files = []
     for character_log in character_logs:
@@ -83,37 +109,12 @@ def open_character_logs(character_logs, filter_characters):
             continue
 
         print(f'open {name} log at {path}')
-        character_files.append((
-            name, open(path, 'r', encoding='UTF8')
-        ))
+        file = open(path, 'r', encoding='UTF8')
+        if seek_to_end:
+            file.seek(0, 2)
+
+        character_files.append(CharacterLogFile(path, name, file))
     return character_files
-
-def read_all_combat_log_entries(character_files):
-    """Read all combat log entries from character log files"""
-    character_log_entries = map(_read_all_combat_log_entries, character_files)
-
-    for character_entries in character_log_entries:
-        for entry in character_entries:
-            yield entry
-
-def follow_files(character_files):
-    """Continually read (character, line) pairs from files"""
-
-    # Seek to end of files
-    for character_file_pair in character_files:
-        (_, file) = character_file_pair
-        file.seek(0, 2)
-
-    while True:
-        all_lines = map(_read_combat_log_with_character, character_files)
-        all_lines = list(filter(lambda l: l is not None, all_lines))
-
-        if len(all_lines) == 0:
-            time.sleep(0.01)
-            continue
-
-        for line in all_lines:
-            yield line
 
 def log_entries_to_dataframe(log_entries) -> pd.DataFrame:
     """Create DataFrame from log entries"""
