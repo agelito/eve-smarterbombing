@@ -58,6 +58,19 @@ def render_live(sb_ui: gr.Blocks, configuration):
         value = average_dps_per_character_melt(app_live.incoming_friendly_damage)
 
         return gr.update(value=value, visible=True)
+    
+    def _reload_files():
+        app_live.open_logs()
+
+        return _update_open_log_files()
+
+    def _close_files():
+        app_live.close_logs()
+
+        return _update_open_log_files()
+
+    def _clear_data():
+        app_live.clear_data()
 
     with gr.Column():
         with gr.Row():
@@ -108,8 +121,18 @@ def render_live(sb_ui: gr.Blocks, configuration):
 
     with gr.Column():
         with gr.Accordion('Diagnostics', open=False):
+            with gr.Row():
+                reload_files = gr.Button(value='Reload Files')
+                close_files = gr.Button(value='Close Files')
+                clear_data = gr.Button(value='Clear Data')
+                
+            
             log_timestamp = gr.Markdown(value='Most recent log timestamp: None')
             open_logfiles = gr.Dataframe(value=[], label='Open Logs', visible=False)
+
+            reload_files.click(fn=_reload_files, outputs=open_logfiles)
+            close_files.click(fn=_close_files, outputs=open_logfiles)
+            clear_data.click(fn=_clear_data)
 
     sb_ui.load(_update_app, None, None, every=1)
     sb_ui.load(_update_log_timestamp_text, None, log_timestamp, every=5)

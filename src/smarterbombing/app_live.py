@@ -44,6 +44,21 @@ class AppLive:
 
         self.logs = open_log_files(most_recent_logs, self.configuration['characters'], True)
 
+    def close_logs(self):
+        """Close all log files"""
+        for log in self.logs:
+            log.close()
+
+        self.logs = []
+
+    def clear_data(self):
+        """Clear all data"""
+        self.data = pd.DataFrame([])
+        self.outgoing_hostile_damage = pd.DataFrame([])
+        self.outgoing_friendly_damage = pd.DataFrame([])
+        self.incoming_hostile_damage = pd.DataFrame([])
+        self.incoming_friendly_damage = pd.DataFrame([])
+
     def is_logs_open(self) -> bool:
         """Return boolean indicating if any log files is open"""
         return any(map(lambda log: log.is_open(), self.logs))
