@@ -1,7 +1,7 @@
 """Offline application"""
 import pandas as pd
 from gradio import Progress
-from smarterbombing.analysis import parse_logs, average_dps
+from smarterbombing.analysis import parse_logs, average_dps_per_character, resample_30s_mean
 
 class AppOffline:
     """Class holding state for offline processing"""
@@ -17,8 +17,6 @@ class AppOffline:
 
         self.info = info
         self.data = data
-
-        print(self.data)
 
         return info
 
@@ -38,17 +36,25 @@ class AppOffline:
             return pd.DataFrame([])
 
         session = self.data[self.session_index]
+        data = session['outgoing_hostile_damage']
 
-        return average_dps(session['outgoing_hostile_damage'])
-    
+        average_dps = average_dps_per_character(data)
+        average_dps = resample_30s_mean(average_dps)
+
+        return average_dps
+
     def damage_over_time_friendly(self) -> pd.DataFrame:
         """Returns a dataframe with DPS"""
         if not self.loaded():
             return pd.DataFrame([])
 
         session = self.data[self.session_index]
+        data = session['outgoing_friendly_damage']
 
-        return average_dps(session['outgoing_friendly_damage'])
+        average_dps = average_dps_per_character(data)
+        average_dps = resample_30s_mean(average_dps)
+
+        return average_dps
 
     def damage_over_time_incoming_hostile(self) -> pd.DataFrame:
         """Returns a dataframe with DPS"""
@@ -56,17 +62,25 @@ class AppOffline:
             return pd.DataFrame([])
 
         session = self.data[self.session_index]
+        data = session['incoming_hostile_damage']
 
-        return average_dps(session['incoming_hostile_damage'])
-    
+        average_dps = average_dps_per_character(data)
+        average_dps = resample_30s_mean(average_dps)
+
+        return average_dps
+
     def damage_over_time_incoming_friendly(self) -> pd.DataFrame:
         """Returns a dataframe with DPS"""
         if not self.loaded():
             return pd.DataFrame([])
 
         session = self.data[self.session_index]
+        data = session['incoming_friendly_damage']
 
-        return average_dps(session['incoming_friendly_damage'])
+        average_dps = average_dps_per_character(data)
+        average_dps = resample_30s_mean(average_dps)
+
+        return average_dps
 
     def loaded(self) -> bool:
         """Return boolean indicating if data is loaded"""

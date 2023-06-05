@@ -27,19 +27,6 @@ def _group_by_delta_time(events: pd.DataFrame, max_gap_seconds: float):
 
     return groups
 
-def _total_mean_damage(events: pd.DataFrame, sample_seconds: int):
-    damage = events[['timestamp', 'damage']]
-    damage = damage.groupby('timestamp').sum()
-
-    dps = damage.rolling(timedelta(seconds=sample_seconds)).mean().fillna(0.0)
-
-    if len(dps.index) > 5000:
-        dps = dps.resample('1T').fillna(0.0).mean()
-
-    dps.reset_index(inplace=True)
-
-    return dps
-
 def parse_logs(configuration, date, progress=Progress()):
     """Parse logs collecting events and best effort split into sessions"""
 
@@ -55,8 +42,6 @@ def parse_logs(configuration, date, progress=Progress()):
     progress(0.2, desc='Parsing log messages')
     combat_log_entries = list(read_all_combat_log_entries(character_files))
     combat_log_entries = log_entries_to_dataframe(combat_log_entries)
-
-    combat_log_entries.to_csv('out.csv')
 
     sessions = _group_by_delta_time(combat_log_entries, 350)
 
@@ -93,6 +78,31 @@ def parse_logs(configuration, date, progress=Progress()):
 
     return (data, pd.DataFrame(info))
 
-def average_dps(data, rolling_window=120) -> pd.DataFrame:
-    """Calculate average dps"""
-    return _total_mean_damage(data, rolling_window)
+def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
+    """Calculate average DPS per character"""
+    data = data[['timestamp', 'character', 'damage']]
+    data = data.groupby(['timestamp', 'character']).sum().reset_index()
+    data = data.pivot(
+        index='timestamp',
+        columns='character',
+        values='damage'
+    ).fillna(0.0)
+    data = data.assign(Total=data.sum(1))
+    data = data.resample('1S').asfreq(fill_value=0.0)
+
+    if average_seconds > 0:
+        data = data.rolling(timedelta(seconds=average_seconds)).mean()
+
+    return data
+
+def average_dps_per_character_melt(data: pd.DataFrame) -> pd.DataFrame:
+    """Reshape DataFrame to long format"""
+    data = data.reset_index().melt(id_vars='timestamp', value_name='damage')
+
+    return data
+
+def resample_30s_mean(data: pd.DataFrame) -> pd.DataFrame:
+    """Resample data to 30s average rows"""
+
+    return data.resample('30S').mean()
+

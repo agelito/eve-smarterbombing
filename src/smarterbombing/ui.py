@@ -1,6 +1,7 @@
 """User interface"""
 import gradio as gr
 
+from smarterbombing.analysis import average_dps_per_character_melt
 from smarterbombing.configuration import load_configuration, save_configuration
 from smarterbombing.app_offline import AppOffline
 from smarterbombing.logs import find_all_dates
@@ -28,16 +29,16 @@ def _change_log_directory(new_log_directory):
     print(f'changed log_directory -> {new_log_directory}')
 
 def _damage_over_time_hostile():
-    return offline_app.damage_over_time_hostile()
+    return average_dps_per_character_melt(offline_app.damage_over_time_hostile())
 
 def _damage_over_time_friendly():
-    return offline_app.damage_over_time_friendly()
+    return average_dps_per_character_melt(offline_app.damage_over_time_friendly())
 
 def _damage_over_time_incoming_hostile():
-    return offline_app.damage_over_time_incoming_hostile()
+    return average_dps_per_character_melt(offline_app.damage_over_time_incoming_hostile())
 
 def _damage_over_time_incoming_friendly():
-    return offline_app.damage_over_time_incoming_friendly()
+    return average_dps_per_character_melt(offline_app.damage_over_time_incoming_friendly())
 
 with gr.Blocks(title="Smarterbombing") as sb_ui:
     with gr.Tab('Offline Analysis'):
@@ -51,10 +52,11 @@ with gr.Blocks(title="Smarterbombing") as sb_ui:
                 log_dates = find_all_dates(configuration['log_directory'])
                 selected_date = gr.Dropdown(choices=log_dates, label='Date')
 
-            sessions = gr.DataFrame(
-                label='Sessions',
-                headers=['Date', 'Start', 'End'],
-                interactive=False)
+            with gr.Accordion(label='Sessions'):
+                sessions = gr.DataFrame(
+                    label='Sessions',
+                    headers=['Date', 'Start', 'End'],
+                    interactive=False)
 
         with gr.Column():
             with gr.Row():
@@ -63,32 +65,36 @@ with gr.Blocks(title="Smarterbombing") as sb_ui:
                     x='timestamp',
                     y_title='DPS',
                     y='damage',
-                    title='Damage to NPCs',
-                    width=620)
+                    color='character',
+                    title='Outgoing Damage',
+                    width=530)
 
                 dps_out_f = gr.LinePlot(
                     x_title='Time',
                     x='timestamp',
                     y_title='DPS',
                     y='damage',
-                    title='Damage to Friends',
-                    width=620)
+                    color='character',
+                    title='Outgoing Damage (Friendly)',
+                    width=530)
             with gr.Row():
                 dps_in_h = gr.LinePlot(
                     x_title='Time',
                     x='timestamp',
                     y_title='DPS',
                     y='damage',
-                    title='Damage from NPCs',
-                    width=620)
+                    color='character',
+                    title='Incoming Damage',
+                    width=530)
 
                 dps_in_f = gr.LinePlot(
                     x_title='Time',
                     x='timestamp',
                     y_title='DPS',
                     y='damage',
-                    title='Damage from Friends',
-                    width=620)
+                    color='character',
+                    title='Incoming Damage (Friendly)',
+                    width=530)
 
         selected_date.change(
             offline_app.load_at_date,
