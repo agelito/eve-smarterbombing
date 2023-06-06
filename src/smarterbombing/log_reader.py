@@ -90,6 +90,9 @@ def _flatten(in_list):
 
 def read_all_combat_log_entries(character_files: list[CharacterLogFile]):
     """Read all combat log entries from character log files"""
+    if len(character_files) == 0:
+        return []
+
     character_log_entries = map(_read_and_parse_combat_log_lines, character_files)
 
     return _flatten(character_log_entries)

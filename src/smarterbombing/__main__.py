@@ -2,7 +2,7 @@
 from argparse import ArgumentParser
 import sys
 
-from smarterbombing.webui.ui import run_webui
+import smarterbombing.webui.ui as ui
 
 parser = ArgumentParser(
     prog='smarterbombing',
@@ -28,7 +28,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if args.mode == 'webui':
-    run_webui(args.port)
+    ui.run_webui(args.port)
 else:
     print(f'unrecognized mode: {args.mode}')
     sys.exit(1)
