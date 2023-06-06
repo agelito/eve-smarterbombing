@@ -1,7 +1,15 @@
 # Eve Smarterbombing
 An application analyzing Eve Online combat logs and presenting data in a Web interface.
 
-## Quick Start
+## ⚡ Quick Start
+
+### From PyPI
+```shell
+pip install smarterbombing
+python -m smarterbombing
+```
+
+### From Source
 ```shell
 poetry install
 poetry run python -m smarterbombing
@@ -12,7 +20,7 @@ Open with your preferred browser:
 
 
 
-### Command line options
+### 📃 Command line options
 | Flag | Valid Values | Default | Description |
 |---   |---     |---      | ---         |
 | `--mode` | `webui` | `webui` | Which UI mode to run  |
@@ -20,7 +28,7 @@ Open with your preferred browser:
 
 
 
-## Development (Hot reload)
+## 🚧 Development
 ```shell
 poetry install
 
