@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.4 (2023-06-06)
+
+### Fix
+
+* Change incompatible list type hint syntax ([`2b79c6d`](https://github.com/agelito/eve-smarterbombing/commit/2b79c6d4fd334827e6f0a45646ccfb706687d453))
+
 ## v0.1.3 (2023-06-06)
 
 ### Fix
