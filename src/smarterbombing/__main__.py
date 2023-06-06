@@ -1,59 +1,29 @@
-from datetime import timedelta
-import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 import pandas as pd
 
-from smarterbombing.analysis import parse_logs
-from smarterbombing.configuration import load_configuration
+from smarterbombing.analysis import average_dps_per_character_melt, fixed_window_average_dps_per_character
 
-CONFIGURATION_PATH = 'configuration.json'
-DATE = '2023-05-30'
+characters = ['Ageliten', 'Fresar Ronuken', 'Yeol Ramyun', 'Mr Vesuvio']
+template = pd.DataFrame(columns=characters)
 
-def _real_session_data():
-    configuration = load_configuration(CONFIGURATION_PATH)
+data = pd.DataFrame([
+    {'timestamp': '2023-06-06 00:42:38', 'character': 'Ageliten', 'damage': 10 },
+    { 'timestamp': '2023-06-06 00:47:31', 'character': 'Fresar Ronuken', 'damage': 5 },
+    { 'timestamp': '2023-06-06 00:47:31', 'character': 'Ageliten', 'damage': 13 },
+    { 'timestamp': '2023-06-06 00:42:43', 'character': 'Fresar Ronuken', 'damage': 2 },
+    { 'timestamp': '2023-06-06 00:42:41', 'character': 'Yeol Ramyun', 'damage': 4 },
+    { 'timestamp': '2023-06-06 00:47:32', 'character': 'Mr Vesuvio', 'damage': 1 },
+    { 'timestamp': '2023-06-06 00:42:42', 'character': 'Ageliten', 'damage': 6 },
+])
+data['timestamp'] = pd.to_datetime(data['timestamp'])
 
-    (data, info) = parse_logs(configuration, DATE)
+empty_data = pd.DataFrame(columns=['timestamp', 'character', 'damage'])
 
-    return data[0]['outgoing_hostile_damage'][['timestamp', 'character', 'damage']]
+start_at = datetime.strptime('2023-06-06 00:42:38', '%Y-%m-%d %H:%M:%S')
+end_at = start_at + timedelta(minutes=5)
 
+average_dps = fixed_window_average_dps_per_character(empty_data, template, start_at, end_at)
+average_dps = average_dps_per_character_melt(average_dps)
+average_dps.to_csv('combined.csv')
 
-def _avg_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
-    data = data.groupby(['timestamp', 'character']).sum().reset_index()
-    data = data.pivot(
-        index='timestamp',
-        columns='character',
-        values='damage'
-    ).fillna(0.0)
-    data = data.assign(Total=data.sum(1))
-    data = data.resample('1S').asfreq(fill_value=0.0)
-
-    if average_seconds > 0:
-        data = data.rolling(timedelta(seconds=average_seconds)).mean()
-
-    return data
-
-def _forged_session_data():
-    data = [
-        { 'timestamp': '2023-06-06 10:00:00', 'character': 'Ageliten', 'damage': 5 },
-        { 'timestamp': '2023-06-06 10:00:00', 'character': 'Ageliten', 'damage': 8 },
-        { 'timestamp': '2023-06-06 10:00:00', 'character': 'Yeol Ramyun', 'damage': 2 },
-        { 'timestamp': '2023-06-06 10:00:01', 'character': 'Yeol Ramyun', 'damage': 4 },
-        { 'timestamp': '2023-06-06 10:00:01', 'character': 'Fresar Ronuken', 'damage': 1 },
-        { 'timestamp': '2023-06-06 10:00:03', 'character': 'Mr Vesuvio', 'damage': 5 },
-        { 'timestamp': '2023-06-06 10:00:03', 'character': 'Ageliten', 'damage': 8 },
-        { 'timestamp': '2023-06-06 10:00:04', 'character': 'Yeol Ramyun', 'damage': 13 },
-        { 'timestamp': '2023-06-06 10:00:09', 'character': 'Ageliten', 'damage': 10 },
-        { 'timestamp': '2023-06-06 10:00:11', 'character': 'Yeol Ramyun', 'damage': 12 },
-        { 'timestamp': '2023-06-06 10:00:11', 'character': 'Mr Vesuvio', 'damage': 15 },
-    ]
-
-    return pd.DataFrame(data)
-
-hostile_damage = _real_session_data()
-hostile_damage['timestamp'] = pd.to_datetime(hostile_damage['timestamp'])
-
-average_dps = _avg_dps_per_character(hostile_damage, 16)
-
-average_dps.plot(ylabel='Damage', xlabel='Time')
-plt.legend(average_dps.columns)
-
-plt.show()
+print(average_dps)

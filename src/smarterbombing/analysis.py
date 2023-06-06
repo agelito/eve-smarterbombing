@@ -95,12 +95,8 @@ def parse_logs(configuration, date, progress=Progress()):
 
     return (data, pd.DataFrame(info))
 
-def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
-    """Calculate average DPS per character"""
-
-    if data.empty:
-        return data
-
+def reshape_for_per_character_dps(data: pd.DataFrame) -> pd.DataFrame:
+    """Reshape dataframe to represent damage per character"""
     data = data[['timestamp', 'character', 'damage']]
     data = data.groupby(['timestamp', 'character']).sum().reset_index()
     data = data.pivot(
@@ -108,6 +104,42 @@ def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> 
         columns='character',
         values='damage'
     ).fillna(0.0)
+
+    return data
+
+def fixed_window_average_dps_per_character(
+        data: pd.DataFrame,
+        template: pd.DataFrame,
+        start_at: datetime,
+        end_at: datetime,
+        average_seconds: int = 10) -> pd.DataFrame:
+    """Create a fixed time window and populate with average DPS"""
+
+    fixed_window = pd.concat([
+        generate_1s_dataframe(start_at, end_at),
+        template,
+    ]).fillna(0.0)\
+        .set_index('timestamp')\
+        .rename_axis('character', axis='columns')
+
+    data = reshape_for_per_character_dps(data)
+    data = data.combine_first(fixed_window)
+
+    data = data.assign(Total=data.sum(1))
+    data = data.resample('1S').asfreq(fill_value=0.0)
+
+    if average_seconds > 0:
+        data = data.rolling(timedelta(seconds=average_seconds)).mean()
+
+    return data
+
+def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
+    """Calculate average DPS per character"""
+
+    if data.empty:
+        return data
+
+    data = reshape_for_per_character_dps(data)
 
     data = data.assign(Total=data.sum(1))
     data = data.resample('1S').asfreq(fill_value=0.0)
@@ -128,6 +160,19 @@ def resample_30s_mean(data: pd.DataFrame) -> pd.DataFrame:
 
     return data.resample('30S').mean()
 
-def filter_by_datetime(data: pd.DataFrame, after: datetime, until: datetime):
+def generate_1s_dataframe(start_date: datetime, end_date: datetime) -> pd.DataFrame:
+    """Generate index of datetime range with 1 second frequency"""
+    start_date = start_date.replace(microsecond=0)
+    end_date = end_date.replace(microsecond=0)
+
+    timerange = pd.date_range(start_date, end_date, freq='S', unit='s')
+
+    return timerange.to_frame(index=False, name='timestamp')
+
+def filter_by_datetime(data: pd.DataFrame, start_date: datetime, end_date: datetime):
     """Return rows which timestamp is within the provided datetimes"""
-    return data[(data['timestamp'] > after) & (data['timestamp'] <= until)]
+    return data[(data['timestamp'] >= start_date) & (data['timestamp'] <= end_date)]
+
+def create_empty_damage_dataframe():
+    """Create an empty damage DataFrame"""
+    return pd.DataFrame(columns=['timestamp', 'character', 'damage'])

@@ -6,8 +6,9 @@ from smarterbombing.analysis import\
     EVENT_GROUP_INCOMING_HOSTILE_DAMAGE,\
     EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE,\
     EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE,\
-    average_dps_per_character,\
+    create_empty_damage_dataframe,\
     filter_by_datetime,\
+    fixed_window_average_dps_per_character,\
     group_damage_events
 
 from smarterbombing.logs import find_most_recent_character_logs
@@ -26,10 +27,13 @@ class AppLive:
         self.logs: list[CharacterLogFile] = []
 
         self.data = pd.DataFrame([])
-        self.outgoing_hostile_damage = pd.DataFrame([])
-        self.outgoing_friendly_damage = pd.DataFrame([])
-        self.incoming_hostile_damage = pd.DataFrame([])
-        self.incoming_friendly_damage = pd.DataFrame([])
+        self.outgoing_hostile_damage = create_empty_damage_dataframe()
+        self.outgoing_friendly_damage = create_empty_damage_dataframe()
+        self.incoming_hostile_damage = create_empty_damage_dataframe()
+        self.incoming_friendly_damage = create_empty_damage_dataframe()
+
+        self.damage_data_template = pd.DataFrame(columns=configuration['characters'])\
+            .rename_axis('character', axis='columns')
 
         self.data_rows = 0
         self.most_recent_timestamp = None
@@ -54,10 +58,11 @@ class AppLive:
     def clear_data(self):
         """Clear all data"""
         self.data = pd.DataFrame([])
-        self.outgoing_hostile_damage = pd.DataFrame([])
-        self.outgoing_friendly_damage = pd.DataFrame([])
-        self.incoming_hostile_damage = pd.DataFrame([])
-        self.incoming_friendly_damage = pd.DataFrame([])
+
+        self.outgoing_hostile_damage = create_empty_damage_dataframe()
+        self.outgoing_friendly_damage = create_empty_damage_dataframe()
+        self.incoming_hostile_damage = create_empty_damage_dataframe()
+        self.incoming_friendly_damage = create_empty_damage_dataframe()
 
     def is_logs_open(self) -> bool:
         """Return boolean indicating if any log files is open"""
@@ -76,14 +81,18 @@ class AppLive:
         damage_graph_data = filter_by_datetime(self.data, graph_from, graph_until)
         grouped_events = group_damage_events(damage_graph_data, self.configuration['characters'])
 
-        self.outgoing_hostile_damage = average_dps_per_character(
-            grouped_events[EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE])
-        self.outgoing_friendly_damage = average_dps_per_character(
-            grouped_events[EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE])
-        self.incoming_hostile_damage = average_dps_per_character(
-            grouped_events[EVENT_GROUP_INCOMING_HOSTILE_DAMAGE])
-        self.incoming_friendly_damage = average_dps_per_character(
-            grouped_events[EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE])
+        self.outgoing_hostile_damage = fixed_window_average_dps_per_character(
+            grouped_events[EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE],
+            self.damage_data_template, graph_from, graph_until)
+        self.outgoing_friendly_damage = fixed_window_average_dps_per_character(
+            grouped_events[EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE],
+            self.damage_data_template, graph_from, graph_until)
+        self.incoming_hostile_damage = fixed_window_average_dps_per_character(
+            grouped_events[EVENT_GROUP_INCOMING_HOSTILE_DAMAGE],
+            self.damage_data_template, graph_from, graph_until)
+        self.incoming_friendly_damage = fixed_window_average_dps_per_character(
+            grouped_events[EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE],
+            self.damage_data_template, graph_from, graph_until)
 
     def update(self):
         """Read logs and recalculate derived data"""
