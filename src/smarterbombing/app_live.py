@@ -80,19 +80,20 @@ class AppLive:
         """Recalculate average dps data"""
         damage_graph_data = filter_by_datetime(self.data, graph_from, graph_until)
         grouped_events = group_damage_events(damage_graph_data, self.configuration['characters'])
+        average_seconds = self.configuration['dps_rolling_window_seconds']
 
         self.outgoing_hostile_damage = fixed_window_average_dps_per_character(
             grouped_events[EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE],
-            self.damage_data_template, graph_from, graph_until)
+            self.damage_data_template, graph_from, graph_until, average_seconds)
         self.outgoing_friendly_damage = fixed_window_average_dps_per_character(
             grouped_events[EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE],
-            self.damage_data_template, graph_from, graph_until)
+            self.damage_data_template, graph_from, graph_until, average_seconds)
         self.incoming_hostile_damage = fixed_window_average_dps_per_character(
             grouped_events[EVENT_GROUP_INCOMING_HOSTILE_DAMAGE],
-            self.damage_data_template, graph_from, graph_until)
+            self.damage_data_template, graph_from, graph_until, average_seconds)
         self.incoming_friendly_damage = fixed_window_average_dps_per_character(
             grouped_events[EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE],
-            self.damage_data_template, graph_from, graph_until)
+            self.damage_data_template, graph_from, graph_until, average_seconds)
 
     def update(self):
         """Read logs and recalculate derived data"""

@@ -9,7 +9,8 @@ def load_configuration(configuration_path):
     if not isfile(configuration_path):
         configuration = {
             'log_directory': default_log_directory(),
-            'characters': []
+            'characters': [],
+            'dps_rolling_window_seconds': 10,
         }
 
         save_configuration(configuration, configuration_path)

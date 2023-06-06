@@ -21,6 +21,16 @@ def render_configuration(configuration, configuration_path):
         save_configuration(configuration, configuration_path)
         print(f'changed log_directory -> {new_log_directory}')
 
+    def _change_dps_rolling_window(seconds):
+        configuration['dps_rolling_window_seconds'] = seconds
+        save_configuration(configuration, configuration_path)
+        print(f'changed dps_rolling_window_seconds -> {seconds}')
+
+    dps_rolling_window_seconds = gr.Slider(label='Average Window (Seconds)',
+                                           minimum=0.0, maximum=300,
+                                           value=configuration['dps_rolling_window_seconds'])
+    dps_rolling_window_seconds.change(fn=_change_dps_rolling_window,
+                                      inputs=[dps_rolling_window_seconds])
 
     log_directory = gr.Textbox(
         value=configuration['log_directory'],
