@@ -24,7 +24,6 @@ def render_configuration(configuration, configuration_path):
     def _change_dps_rolling_window(seconds):
         configuration['dps_rolling_window_seconds'] = seconds
         save_configuration(configuration, configuration_path)
-        print(f'changed dps_rolling_window_seconds -> {seconds}')
 
     dps_rolling_window_seconds = gr.Slider(label='Average Window (Seconds)',
                                            minimum=0.0, maximum=300,
