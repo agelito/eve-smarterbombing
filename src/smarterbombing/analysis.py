@@ -21,11 +21,11 @@ def _filter_by_direction(events: pd.DataFrame, direction: str):
     filter_outgoing = events['direction'].isin([direction])
     return events[filter_outgoing]
 
-def _filter_unfriendly_damage(events: pd.DataFrame, characters: list[str]):
+def _filter_unfriendly_damage(events: pd.DataFrame, characters):
     filter_friendly = events['subject'].isin(characters)
     return events[~filter_friendly]
 
-def _filter_friendly_damage(events: pd.DataFrame, characters: list[str]):
+def _filter_friendly_damage(events: pd.DataFrame, characters):
     filter_friendly = events['subject'].isin(characters)
     return events[filter_friendly]
 
@@ -38,7 +38,7 @@ def _group_by_delta_time(events: pd.DataFrame, max_gap_seconds: float):
 
     return groups
 
-def group_damage_events(events: pd.DataFrame, characters: list[str]):
+def group_damage_events(events: pd.DataFrame, characters):
     """Sort combat events by type and direction"""
     outgoing_damage = _filter_by_direction(events, 'to')
     outgoing_damage_to_friendly = _filter_friendly_damage(outgoing_damage, characters)
@@ -133,7 +133,7 @@ def fixed_window_average_dps_per_character(
 
     return data
 
-def site_statistics(data: pd.DataFrame, characters: list[str], minimum_gap_seconds: int = 30) -> pd.DataFrame:
+def site_statistics(data: pd.DataFrame, characters, minimum_gap_seconds: int = 30) -> pd.DataFrame:
     """Calculate site based time statistics"""
     data = _filter_by_direction(data, 'to')
     data = data.sort_values(by='timestamp')

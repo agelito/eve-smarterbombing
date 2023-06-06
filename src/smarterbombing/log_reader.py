@@ -88,7 +88,7 @@ def _read_and_parse_combat_log_lines(log: CharacterLogFile):
 def _flatten(in_list):
     return [item for ll in in_list for item in ll]
 
-def read_all_combat_log_entries(character_files: list[CharacterLogFile]):
+def read_all_combat_log_entries(character_files):
     """Read all combat log entries from character log files"""
     if len(character_files) == 0:
         return []
@@ -101,7 +101,7 @@ def open_log_files(
         character_logs,
         filter_characters,
         seek_to_end: bool = False
-    ) -> list[CharacterLogFile]:
+    ):
     """Open character log files"""
     character_files = []
     for character_log in character_logs:

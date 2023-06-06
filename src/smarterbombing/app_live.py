@@ -28,7 +28,7 @@ class AppLive:
         self.configuration = configuration
         self.current_time = datetime.now(timezone.utc)
 
-        self.logs: list[CharacterLogFile] = []
+        self.logs = []
 
         self.data = pd.DataFrame([])
         self.outgoing_hostile_damage = create_empty_damage_dataframe()
