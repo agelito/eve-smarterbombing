@@ -6,63 +6,61 @@ from smarterbombing.analysis import average_dps_per_character_melt
 
 from smarterbombing.app_live import AppLive
 
-def render_live(sb_ui: gr.Blocks, configuration):
+def render_live(sb_ui: gr.Blocks, app: AppLive):
     """Render live UI"""
-    app_live = AppLive(configuration)
-    app_live.open_logs()
 
     def _update_app():
-        app_live.update()
+        app.update()
 
     def _update_log_timestamp_text():
-        return gr.update(value=f'Log Timestamp: {app_live.most_recent_timestamp}')
+        return gr.update(value=f'Log Timestamp: {app.most_recent_timestamp}')
 
     def _update_open_log_files():
-        if not app_live.is_logs_open():
+        if not app.is_logs_open():
             return gr.update(visible=False)
 
         log_table = list(map(
             lambda log: { 'File': log.filename, 'Character': log.character },
-            app_live.logs
+            app.logs
         ))
 
         return gr.update(value=pd.DataFrame(log_table), visible=True)
 
     def _update_outgoing_hostile_dps():
-        if app_live.outgoing_hostile_damage.empty:
+        if app.outgoing_hostile_damage.empty:
             return gr.update(visible=False)
 
-        value = average_dps_per_character_melt(app_live.outgoing_hostile_damage)
+        value = average_dps_per_character_melt(app.outgoing_hostile_damage)
 
         return gr.update(value=value, visible=True)
 
     def _update_outgoing_friendly_dps():
-        if app_live.outgoing_friendly_damage.empty:
+        if app.outgoing_friendly_damage.empty:
             return gr.update(visible=False)
 
-        value = average_dps_per_character_melt(app_live.outgoing_friendly_damage)
+        value = average_dps_per_character_melt(app.outgoing_friendly_damage)
 
         return gr.update(value=value, visible=True)
 
     def _update_incoming_hostile_dps():
-        if app_live.incoming_hostile_damage.empty:
+        if app.incoming_hostile_damage.empty:
             return gr.update(visible=False)
 
-        value = average_dps_per_character_melt(app_live.incoming_hostile_damage)
+        value = average_dps_per_character_melt(app.incoming_hostile_damage)
 
         return gr.update(value=value, visible=True)
 
     def _update_incoming_friendly_dps():
-        if app_live.incoming_friendly_damage.empty:
+        if app.incoming_friendly_damage.empty:
             return gr.update(visible=False)
 
-        value = average_dps_per_character_melt(app_live.incoming_friendly_damage)
+        value = average_dps_per_character_melt(app.incoming_friendly_damage)
 
         return gr.update(value=value, visible=True)
 
     def _update_site_statistics():
-        app_live.update_site_statistics()
-        value = app_live.site_statistics
+        app.update_site_statistics()
+        value = app.site_statistics
 
         if value.empty:
             return gr.update(visible=False)
@@ -72,8 +70,8 @@ def render_live(sb_ui: gr.Blocks, configuration):
         return gr.update(value=value, visible=True)
 
     def _update_compound_site_statistics():
-        app_live.update_compound_site_statistics()
-        value = app_live.site_compound_statistics
+        app.update_compound_site_statistics()
+        value = app.site_compound_statistics
 
         if value.empty:
             return gr.update(visible=False)
@@ -83,17 +81,17 @@ def render_live(sb_ui: gr.Blocks, configuration):
         return gr.update(value=value, visible=True)
 
     def _reload_files():
-        app_live.open_logs()
+        app.open_logs()
 
         return _update_open_log_files()
 
     def _close_files():
-        app_live.close_logs()
+        app.close_logs()
 
         return _update_open_log_files()
 
     def _clear_data():
-        app_live.clear_data()
+        app.clear_data()
 
     with gr.Column():
         with gr.Row():

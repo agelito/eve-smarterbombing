@@ -5,21 +5,20 @@ from smarterbombing.app_offline import AppOffline
 
 from smarterbombing.logs import find_all_dates
 
-def render_offline_analysis(configuration):
+def render_offline_analysis(app: AppOffline, configuration):
     """Render the offline analysis UI"""
-    offline_app = AppOffline(configuration)
 
     def _damage_over_time_hostile():
-        return average_dps_per_character_melt(offline_app.damage_over_time_hostile())
+        return average_dps_per_character_melt(app.damage_over_time_hostile())
 
     def _damage_over_time_friendly():
-        return average_dps_per_character_melt(offline_app.damage_over_time_friendly())
+        return average_dps_per_character_melt(app.damage_over_time_friendly())
 
     def _damage_over_time_incoming_hostile():
-        return average_dps_per_character_melt(offline_app.damage_over_time_incoming_hostile())
+        return average_dps_per_character_melt(app.damage_over_time_incoming_hostile())
 
     def _damage_over_time_incoming_friendly():
-        return average_dps_per_character_melt(offline_app.damage_over_time_incoming_friendly())
+        return average_dps_per_character_melt(app.damage_over_time_incoming_friendly())
 
     with gr.Column():
         with gr.Row():
@@ -76,7 +75,7 @@ def render_offline_analysis(configuration):
                 width=530)
 
     selected_date.change(
-        offline_app.load_at_date,
+        app.load_at_date,
         inputs=[selected_date],
         outputs=[sessions],
     ).then(
