@@ -58,7 +58,7 @@ def render_live(sb_ui: gr.Blocks, configuration):
         value = average_dps_per_character_melt(app_live.incoming_friendly_damage)
 
         return gr.update(value=value, visible=True)
-    
+
     def _reload_files():
         app_live.open_logs()
 
@@ -84,7 +84,7 @@ def render_live(sb_ui: gr.Blocks, configuration):
                 interactive=False,
                 visible=False,
                 width=530)
-            
+
             dps_in_h = gr.LinePlot(
                 x_title='Time',
                 x='timestamp',
@@ -95,7 +95,7 @@ def render_live(sb_ui: gr.Blocks, configuration):
                 interactive=False,
                 visible=False,
                 width=530)
-            
+
         with gr.Row():
             dps_out_f = gr.LinePlot(
                 x_title='Time',
@@ -125,8 +125,8 @@ def render_live(sb_ui: gr.Blocks, configuration):
                 reload_files = gr.Button(value='Reload Files')
                 close_files = gr.Button(value='Close Files')
                 clear_data = gr.Button(value='Clear Data')
-                
-            
+
+
             log_timestamp = gr.Markdown(value='Most recent log timestamp: None')
             open_logfiles = gr.Dataframe(value=[], label='Open Logs', visible=False)
 
