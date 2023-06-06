@@ -40,3 +40,6 @@ stats.transpose().to_markdown('stats.md')
 
 compound_stats = compound_site_statistics(stats)
 compound_stats.to_markdown('compound.md')
+
+print(tabulate(stats, tablefmt='github', showindex=True, headers='keys'))
+print(tabulate(compound_stats, tablefmt='github', headers='keys'))

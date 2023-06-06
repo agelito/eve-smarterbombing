@@ -1,6 +1,7 @@
 """Live UI"""
 import gradio as gr
 import pandas as pd
+from tabulate import tabulate
 from smarterbombing.analysis import average_dps_per_character_melt
 
 from smarterbombing.app_live import AppLive
@@ -66,6 +67,8 @@ def render_live(sb_ui: gr.Blocks, configuration):
         if value.empty:
             return gr.update(visible=False)
 
+        value = tabulate(value, tablefmt='html', headers='keys')
+
         return gr.update(value=value, visible=True)
 
     def _update_compound_site_statistics():
@@ -74,6 +77,8 @@ def render_live(sb_ui: gr.Blocks, configuration):
 
         if value.empty:
             return gr.update(visible=False)
+
+        value = tabulate(value, tablefmt='html', headers='keys')
 
         return gr.update(value=value, visible=True)
 
@@ -138,8 +143,8 @@ def render_live(sb_ui: gr.Blocks, configuration):
                 width=530)
 
         with gr.Column():
-            compound_site_statistics = gr.DataFrame(label='Compound Site Statistics', interactive=False)
-            site_statistics = gr.DataFrame(label='Site Statistics', interactive=False)
+            compound_site_statistics = gr.HTML()
+            site_statistics = gr.HTML()
 
     gr.Markdown(value='_Graphs and statistics will appear once started ratting._')
 
