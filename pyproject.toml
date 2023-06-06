@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smarterbombing"
-version = "0.1.0"
+version = "0.1.1"
 description = "A tool which reads combat logs from Eve Online and displays statistics."
 repository = "https://github.com/agelito/eve-smarterbombing"
 authors = ["Axel Wettervik <axel.wettervik@gmail.com>"]
