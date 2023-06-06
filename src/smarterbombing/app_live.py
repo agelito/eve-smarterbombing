@@ -1,15 +1,19 @@
 """Live application"""
 from datetime import timedelta, datetime, timezone
 import pandas as pd
-from smarterbombing.analysis import\
-    EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE,\
-    EVENT_GROUP_INCOMING_HOSTILE_DAMAGE,\
-    EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE,\
-    EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE,\
-    create_empty_damage_dataframe,\
-    filter_by_datetime,\
-    fixed_window_average_dps_per_character,\
-    group_damage_events
+from smarterbombing.analysis import (
+    EVENT_GROUP_INCOMING_FRIENDLY_DAMAGE,
+    EVENT_GROUP_INCOMING_HOSTILE_DAMAGE,
+    EVENT_GROUP_OUTGOING_FRIENDLY_DAMAGE,
+    EVENT_GROUP_OUTGOING_HOSTILE_DAMAGE,
+    compound_site_statistics,
+    create_empty_compound_site_statistics_dataframe,
+    create_empty_damage_dataframe,
+    create_empty_site_statistics_dataframe,
+    filter_by_datetime,
+    fixed_window_average_dps_per_character,
+    group_damage_events,
+    site_statistics)
 
 from smarterbombing.logs import find_most_recent_character_logs
 from smarterbombing.log_reader import\
@@ -31,6 +35,9 @@ class AppLive:
         self.outgoing_friendly_damage = create_empty_damage_dataframe()
         self.incoming_hostile_damage = create_empty_damage_dataframe()
         self.incoming_friendly_damage = create_empty_damage_dataframe()
+
+        self.site_statistics = create_empty_site_statistics_dataframe()
+        self.site_compound_statistics = create_empty_compound_site_statistics_dataframe()
 
         self.damage_data_template = pd.DataFrame(columns=configuration['characters'])\
             .rename_axis('character', axis='columns')
@@ -63,6 +70,9 @@ class AppLive:
         self.outgoing_friendly_damage = create_empty_damage_dataframe()
         self.incoming_hostile_damage = create_empty_damage_dataframe()
         self.incoming_friendly_damage = create_empty_damage_dataframe()
+
+        self.site_statistics = create_empty_site_statistics_dataframe()
+        self.site_compound_statistics = create_empty_compound_site_statistics_dataframe()
 
     def is_logs_open(self) -> bool:
         """Return boolean indicating if any log files is open"""
@@ -109,3 +119,13 @@ class AppLive:
             damage_graph_from = self.current_time - self.damage_graph_time_window
             damage_graph_until = self.current_time
             self.recalculate_damage_graphs(damage_graph_from, damage_graph_until)
+
+    def update_site_statistics(self):
+        """Update site statistics"""
+        if not self.data.empty:
+            self.site_statistics = site_statistics(self.data, self.configuration['characters'])
+
+    def update_compound_site_statistics(self):
+        """Update compound site statistics"""
+        if not self.site_statistics.empty:
+            self.site_compound_statistics = compound_site_statistics(self.site_statistics)

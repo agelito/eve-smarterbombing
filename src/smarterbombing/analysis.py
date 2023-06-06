@@ -133,17 +133,21 @@ def fixed_window_average_dps_per_character(
 
     return data
 
-def site_statistics(data: pd.DataFrame, characters: list[str]) -> pd.DataFrame:
+def site_statistics(data: pd.DataFrame, characters: list[str], minimum_gap_seconds: int = 30) -> pd.DataFrame:
     """Calculate site based time statistics"""
     data = _filter_by_direction(data, 'to')
     data = data.sort_values(by='timestamp')
+    data = data.reset_index()
 
     # Calculate event deltas
     data['delta_time'] = data['timestamp'].diff()
 
     # Assign site index based on time
-    data['new_site'] = data['delta_time'] > timedelta(seconds=30)
+    data['new_site'] = data['delta_time'] > timedelta(seconds=minimum_gap_seconds)
     data['site_index'] = data['new_site'].cumsum()
+
+    if not data['new_site'].any():
+        return create_empty_site_statistics_dataframe()
 
     mask_friendly = data['subject'].apply(lambda c: c in characters)
     data['hit_friendly'] = mask_friendly
@@ -266,3 +270,32 @@ def filter_by_datetime(data: pd.DataFrame, start_date: datetime, end_date: datet
 def create_empty_damage_dataframe():
     """Create an empty damage DataFrame"""
     return pd.DataFrame(columns=['timestamp', 'character', 'damage'])
+
+def create_empty_site_statistics_dataframe():
+    """Create an empty site statistics DataFrame"""
+    return pd.DataFrame(columns=[
+        'effective_start_time',
+        'effective_end_time',
+        'start_time',
+        'end_time',
+        'duration',
+        'effective_duration',
+        'damage',
+        'hits',
+    ])
+
+def create_empty_compound_site_statistics_dataframe():
+    """Create an empty compound site statistics DataFrame"""
+    return pd.DataFrame(columns=[
+        'total_time',
+        'total_downtime',
+        'total_effective_time',
+        'sites_per_hour',
+        'average_downtime',
+        'average_time',
+        'average_effective_time',
+        'average_damage',
+        'total_damage',
+        'damage_per_second',
+        'time_efficiency',
+    ])

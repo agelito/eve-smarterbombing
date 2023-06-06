@@ -59,6 +59,24 @@ def render_live(sb_ui: gr.Blocks, configuration):
 
         return gr.update(value=value, visible=True)
 
+    def _update_site_statistics():
+        app_live.update_site_statistics()
+        value = app_live.site_statistics
+
+        if value.empty:
+            return gr.update(visible=False)
+
+        return gr.update(value=value, visible=True)
+
+    def _update_compound_site_statistics():
+        app_live.update_compound_site_statistics()
+        value = app_live.site_compound_statistics
+
+        if value.empty:
+            return gr.update(visible=False)
+
+        return gr.update(value=value, visible=True)
+
     def _reload_files():
         app_live.open_logs()
 
@@ -119,13 +137,18 @@ def render_live(sb_ui: gr.Blocks, configuration):
                 visible=False,
                 width=530)
 
+        with gr.Column():
+            compound_site_statistics = gr.DataFrame(label='Compound Site Statistics', interactive=False)
+            site_statistics = gr.DataFrame(label='Site Statistics', interactive=False)
+
+    gr.Markdown(value='_Graphs and statistics will appear once started ratting._')
+
     with gr.Column():
         with gr.Accordion('Diagnostics', open=False):
             with gr.Row():
                 reload_files = gr.Button(value='Reload Files')
                 close_files = gr.Button(value='Close Files')
                 clear_data = gr.Button(value='Clear Data')
-
 
             log_timestamp = gr.Markdown(value='Most recent log timestamp: None')
             open_logfiles = gr.Dataframe(value=[], label='Open Logs', visible=False)
@@ -142,3 +165,5 @@ def render_live(sb_ui: gr.Blocks, configuration):
     sb_ui.load(_update_outgoing_friendly_dps, None, dps_out_f, every=1)
     sb_ui.load(_update_incoming_hostile_dps, None, dps_in_h, every=1)
     sb_ui.load(_update_incoming_friendly_dps, None, dps_in_f, every=1)
+    sb_ui.load(_update_site_statistics, None, site_statistics, every=5)
+    sb_ui.load(_update_compound_site_statistics, None, compound_site_statistics, every=5)

@@ -1,7 +1,9 @@
 import pandas as pd
+from tabulate import tabulate
 
 from smarterbombing.analysis import compound_site_statistics, parse_logs, site_statistics
 from smarterbombing.configuration import load_configuration
+
 
 characters = ['Ageliten', 'Fresar Ronuken', 'Yeol Ramyun', 'Mr Vesuvio']
 template = pd.DataFrame(columns=characters)
@@ -31,13 +33,10 @@ df = pd.DataFrame([
 ])
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-df = _real_session_data()
+# df = _real_session_data()
 
 stats = site_statistics(df, characters)
-stats.to_markdown('stats.md')
+stats.transpose().to_markdown('stats.md')
 
 compound_stats = compound_site_statistics(stats)
-compound_stats.transpose().to_markdown('compound.md')
-
-print(stats)
-print(compound_stats)
+compound_stats.to_markdown('compound.md')
