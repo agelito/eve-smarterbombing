@@ -133,6 +133,96 @@ def fixed_window_average_dps_per_character(
 
     return data
 
+def site_statistics(data: pd.DataFrame, characters: list[str]) -> pd.DataFrame:
+    """Calculate site based time statistics"""
+    data = _filter_by_direction(data, 'to')
+    data = data.sort_values(by='timestamp')
+
+    # Calculate event deltas
+    data['delta_time'] = data['timestamp'].diff()
+
+    # Assign site index based on time
+    data['new_site'] = data['delta_time'] > timedelta(seconds=30)
+    data['site_index'] = data['new_site'].cumsum()
+
+    mask_friendly = data['subject'].apply(lambda c: c in characters)
+    data['hit_friendly'] = mask_friendly
+
+    data_no_friendly = data[~data['hit_friendly']]
+
+    filter_new_sites = data['new_site']
+    site_downtime = data[filter_new_sites][['site_index', 'delta_time']]\
+        .set_index('site_index')\
+        .rename(columns={'delta_time': 'downtime'})
+
+    site_groups = data.groupby('site_index')
+    start_times = site_groups['timestamp'].first()
+    end_times = site_groups['timestamp'].last()
+
+    site_groups = data_no_friendly.groupby('site_index')
+    effective_start_times = site_groups['timestamp'].first()
+    effective_end_times = site_groups['timestamp'].last()
+
+    site_damage = data_no_friendly.pivot(columns='site_index', values='damage').sum()
+    site_hits = data_no_friendly.pivot(columns='site_index', values='subject').count()
+
+    durations = end_times - start_times
+    effective_durations = effective_end_times - effective_start_times
+
+    result = pd.DataFrame({
+        'effective_start_time': effective_start_times,
+        'effective_end_time': effective_end_times,
+        'start_time': start_times,
+        'end_time': end_times,
+        'duration': durations,
+        'effective_duration': effective_durations,
+        'damage': site_damage,
+        'hits': site_hits,
+    })
+
+    result = result.combine_first(site_downtime).fillna(timedelta(0))
+
+    return result
+
+def compound_site_statistics(data: pd.DataFrame):
+    """Calculate compound site statistics"""
+    total_time = data.iloc[-1]['end_time'] - data.iloc[0]['start_time']
+
+    total_seconds = total_time.total_seconds()
+    total_hours = total_seconds / 3600
+
+    total_downtime = data['downtime'].sum()
+
+    average_downtime = data['downtime'].mean()
+    average_site_time = data['duration'].mean()
+
+    average_effective_time = data['effective_duration'].mean()
+    effective_time = data['effective_duration'].sum()
+
+    effective_seconds = effective_time.total_seconds()
+    time_efficiency = effective_seconds / total_seconds
+
+    sites_per_hour = len(data.index) / total_hours
+
+    total_site_damage = data['damage'].sum()
+    average_site_damage = data['damage'].mean()
+
+    average_damage_per_second = total_site_damage / effective_seconds
+
+    return pd.DataFrame([{
+        'total_time': total_time,
+        'total_downtime': total_downtime,
+        'total_effective_time': effective_time,
+        'sites_per_hour': sites_per_hour,
+        'average_downtime': average_downtime,
+        'average_time': average_site_time,
+        'average_effective_time': average_effective_time,
+        'average_damage': average_site_damage,
+        'total_damage': total_site_damage,
+        'damage_per_second': average_damage_per_second,
+        'time_efficiency': time_efficiency
+    }])
+
 def average_dps_per_character(data: pd.DataFrame, average_seconds: int = 10) -> pd.DataFrame:
     """Calculate average DPS per character"""
 
