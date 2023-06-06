@@ -38,6 +38,9 @@ class AppOffline:
         session = self.data[self.session_index]
         data = session['outgoing_hostile_damage']
 
+        if (data.empty):
+            return pd.DataFrame([])
+
         average_dps = average_dps_per_character(data)
         average_dps = resample_30s_mean(average_dps)
 
@@ -50,6 +53,9 @@ class AppOffline:
 
         session = self.data[self.session_index]
         data = session['outgoing_friendly_damage']
+
+        if (data.empty):
+            return pd.DataFrame([])
 
         average_dps = average_dps_per_character(data)
         average_dps = resample_30s_mean(average_dps)
@@ -64,6 +70,9 @@ class AppOffline:
         session = self.data[self.session_index]
         data = session['incoming_hostile_damage']
 
+        if (data.empty):
+            return pd.DataFrame([])
+
         average_dps = average_dps_per_character(data)
         average_dps = resample_30s_mean(average_dps)
 
@@ -76,6 +85,9 @@ class AppOffline:
 
         session = self.data[self.session_index]
         data = session['incoming_friendly_damage']
+
+        if (data.empty):
+            return pd.DataFrame([])
 
         average_dps = average_dps_per_character(data)
         average_dps = resample_30s_mean(average_dps)

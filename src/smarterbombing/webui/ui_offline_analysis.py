@@ -9,16 +9,52 @@ def render_offline_analysis(app: AppOffline, configuration):
     """Render the offline analysis UI"""
 
     def _damage_over_time_hostile():
-        return average_dps_per_character_melt(app.damage_over_time_hostile())
+        try:
+            data = app.damage_over_time_hostile()
+            if data.empty:
+                return None
+            
+            data = average_dps_per_character_melt(data)
+        except Exception as exc:
+            raise gr.Error('Couldn\'t process data. Perhaps there\'s no session on selected date.') from exc
+        
+        return data
 
     def _damage_over_time_friendly():
-        return average_dps_per_character_melt(app.damage_over_time_friendly())
+        try:
+            data = app.damage_over_time_friendly()
+            if data.empty:
+                return None
+            
+            data = average_dps_per_character_melt(data)
+        except Exception as exc:
+            raise gr.Error('Couldn\'t process data. Perhaps there\'s no session on selected date.') from exc
+
+        return data
 
     def _damage_over_time_incoming_hostile():
-        return average_dps_per_character_melt(app.damage_over_time_incoming_hostile())
+        try:
+            data = app.damage_over_time_incoming_hostile()
+            if data.empty:
+                return None
+            
+            data = average_dps_per_character_melt(data)
+        except Exception as exc:
+            raise gr.Error('Couldn\'t process data. Perhaps there\'s no session on selected date.') from exc
+
+        return data
 
     def _damage_over_time_incoming_friendly():
-        return average_dps_per_character_melt(app.damage_over_time_incoming_friendly())
+        try:
+            data = app.damage_over_time_incoming_friendly()
+            if data.empty:
+                return None
+            
+            data = average_dps_per_character_melt(data)
+        except Exception as exc:
+            raise gr.Error('Couldn\'t process data. Perhaps there\'s no session on selected date.') from exc
+
+        return data
 
     with gr.Column():
         with gr.Row():
