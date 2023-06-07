@@ -1,6 +1,9 @@
 # Configuration file
 configuration.json
 
+# Benchmark results
+benchmark/results/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

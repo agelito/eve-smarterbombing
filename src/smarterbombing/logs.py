@@ -4,7 +4,6 @@ from os import listdir
 from os.path import isfile, join
 from pathlib import Path
 import pandas as pd
-from parse import parse
 
 def _map_log_file(filename: str):
     """Retrieve structured data about log file based on the file name"""
@@ -47,11 +46,9 @@ def _read_log_character_name(log_file_path):
             return None
 
         character_line = log_file.readline().strip()
-        character_name = parse('Listener: {}', character_line)
-        if character_name is None:
-            return None
+        character_name = character_line[:9]
 
-    return character_name[0]
+    return character_name
 
 def _create_log_result(directory, log):
     log_path = join(directory, log['filename'])
