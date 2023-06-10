@@ -80,3 +80,35 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+  bundle:
+    needs: cd
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Check-out repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install package
+        run: poetry install
+
+      - name: Build Bundle
+        run: pyinstaller --hidden-import gradio_client --collect-data gradio_client --hidden-import gradio --collect-data gradio --noconfirm -F -n smarterbombing -i .\res\sb-icon.ico .\src\smarterbombing\__main__.py
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: smarterbombing
+          path: dist/smarterbombing.exe
