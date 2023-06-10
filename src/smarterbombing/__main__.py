@@ -28,6 +28,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if args.mode == 'webui':
+    print('Starting WebUI...')
     ui.run_webui(args.port)
 else:
     print(f'unrecognized mode: {args.mode}')
