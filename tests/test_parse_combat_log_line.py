@@ -7,7 +7,7 @@ from smarterbombing.parsing.combat_log_parser import parse_combat_log_line
         'log_line, combat_log_data',
         [
             ('[ 2023.06.03 05:36:39 ] (combat) <color=0xff00ffff><b>26</b> <color=0x77ffffff><font size=10>to</font> <b><color=0xffffffff>Fresar Ronuken[GUNS-](Machariel)</b><font size=10><color=0x77ffffff> - Imperial Navy Large EMP Smartbomb - Hits',
-             { 'timestamp': datetime(2023, 6, 3, 5, 36, 39), 'message_type': 'combat', 'damage': 26, 'direction': 'to', 'subject': 'Fresar Ronuken[GUNS-](Machariel)', 'what': 'Imperial Navy Large EMP Smartbomb', 'quality': 'Hits'}),
+             { 'timestamp': datetime(2023, 6, 3, 5, 36, 39), 'message_type': 'combat', 'damage': 26, 'direction': 'to', 'subject': 'Fresar Ronuken', 'what': 'Imperial Navy Large EMP Smartbomb', 'quality': 'Hits'}),
             ('[ 2023.06.03 05:36:39 ] (combat) <color=0xff00ffff><b>375</b> <color=0x77ffffff><font size=10>to</font> <b><color=0xffffffff>Centus Dread Lord</b><font size=10><color=0x77ffffff> - Imperial Navy Large EMP Smartbomb - Hits',
              { 'timestamp': datetime(2023, 6, 3, 5, 36, 39), 'message_type': 'combat', 'damage': 375, 'direction': 'to', 'subject': 'Centus Dread Lord', 'what': 'Imperial Navy Large EMP Smartbomb', 'quality': 'Hits'}),
             ('[ 2023.06.03 05:36:38 ] (combat) <color=0xffcc0000><b>65</b> <color=0x77ffffff><font size=10>from</font> <b><color=0xffffffff>Centus Tyrant</b><font size=10><color=0x77ffffff> - Hits',

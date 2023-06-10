@@ -5,9 +5,10 @@ from yaml import (
     load as ymload,
     dump as ymdump,
     Loader, Dumper)
-from smarterbombing.logs import default_log_directory
+from smarterbombing.logs.log_locator import default_log_directory
 
-CONFIGURATION_FILE_NAME = 'smarterbombing.yml'
+CONFIGURATION_FILE_NAME = 'smarterbombing.yaml'
+CONFIGURATION_MAX_SQUADS = 10
 
 def exists(name_prefix='') -> bool:
     """
@@ -26,10 +27,17 @@ def create_default() -> dict:
     
     """
 
+    squads = []
+    for i in range(CONFIGURATION_MAX_SQUADS):
+        squads.append({ 'squad_name': f'Squad {i + 1}', 'characters': [] })
+
     configuration = {}
     configuration['log_directory'] = default_log_directory()
-    configuration['squads'] = []
-    configuration['dps_rolling_window_seconds'] = 10
+    configuration['squads'] = squads
+    configuration['dps_average_seconds'] = 10
+    configuration['live_graph_minutes'] = 5
+    configuration['site_boundary_minimum_seconds'] = 20
+    configuration['ignore_list'] = ['Heavy Missile', 'Light Missile']
 
     return configuration
 
@@ -61,7 +69,7 @@ def load(create_if_missing=False, name_prefix='') -> dict:
             return None
 
         configuration = create_default()
-        save(configuration)
+        save(configuration, name_prefix=name_prefix)
 
         return configuration
 
@@ -75,6 +83,7 @@ def delete(name_prefix=''):
     :param name_prefix: append name or path in front of configuration file name
 
     """
+    print(f'deleting: {name_prefix}{CONFIGURATION_FILE_NAME}')
 
     if exists(name_prefix=name_prefix):
         os.unlink(f'{name_prefix}{CONFIGURATION_FILE_NAME}')
@@ -113,3 +122,20 @@ def get_dps_average_seconds(configuration: dict) -> int:
     """
 
     return configuration.get('dps_average_seconds', 10)
+
+def create_squad(configuration: dict, squad_name: str):
+    """
+    Create a new squad.
+
+    :param configuration: configuration
+    :param squad_name: the squad name
+
+    """
+
+    squad = {
+        'squad_name': squad_name,
+        'characters': []
+    }
+
+    squads = configuration.get('squads', [])
+    squads.append(squad)

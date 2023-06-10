@@ -4,7 +4,12 @@ from datetime import datetime
 
 REGEX_REMOVE_LOG_FORMATTING = re.compile('<.*?>')
 
-REGEX_MATCH_COMBAT_LOG = re.compile(r'^\[\ (.*?)\ \]\ \((combat)\) (\d*?) (to|from) (.*?) - ')
+REGEX_MATCH_COMBAT_LOG = re.compile(
+    r'^\[\ (.*?)\ \]\ \((combat)\) (\d*?) (to|from) (.*?)(?!\[.*?\]\(.*?\)) - ')
+
+REGEX_REMOVE_SHIP_TYPE = re.compile(
+    r'\[.*?\]\(.*?\)'
+)
 
 def strip_log_formatting(log_message: str) -> str:
     """
@@ -64,6 +69,8 @@ def parse_combat_log_line(log_line):
         direction,
         subject,
     ) = match.groups()
+
+    subject = re.sub(REGEX_REMOVE_SHIP_TYPE, '', subject)
 
     timestamp = parse_log_timestamp(timestamp)
 

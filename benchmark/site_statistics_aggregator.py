@@ -1,11 +1,10 @@
 import cProfile
 import pstats
 from pstats import SortKey
-from datetime import timedelta
-from smarterbombing.aggregrator.damage_graph_aggregator import DamageGraphAggregator
+from smarterbombing.aggregrator.site_statistics_aggregator import SiteStatisticsAggregator
 from smarterbombing.logs.log_reader import LogReader
 
-def _run_benchmark(aggregator: DamageGraphAggregator):
+def _run_benchmark(aggregator: SiteStatisticsAggregator):
     aggregator.aggregate()
 
 def _run_benchmark_with_file(log_file: str, output_file: str = 'benchmark_stats.txt'):
@@ -19,7 +18,7 @@ def _run_benchmark_with_file(log_file: str, output_file: str = 'benchmark_stats.
 
     events = log_reader.read_log_events()
 
-    aggregator = DamageGraphAggregator(timedelta(minutes=5), 10)
+    aggregator = SiteStatisticsAggregator(30)
     aggregator.append_events(events)
 
     global_env = {}
