@@ -1,4 +1,13 @@
 # Eve Smarterbombing
+
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/agelito/eve-smarterbombing/ci-cd.yml)](https://github.com/agelito/eve-smarterbombing/actions/workflows/ci-cd.yml)
+[![PyPI](https://img.shields.io/pypi/v/smarterbombing)](https://pypi.org/project/smarterbombing/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/smarterbombing)](https://pypi.org/project/smarterbombing/)
+[![codecov](https://codecov.io/gh/agelito/adm-bot/branch/main/graph/badge.svg?token=OHRY3OW18Y)](https://codecov.io/gh/agelito/eve-smarterbombing)
+
+---
+
+
 An application analyzing Eve Online combat logs and presenting data in a Web interface.
 
 ## ⚡ Quick Start
