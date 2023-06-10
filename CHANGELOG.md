@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2023-06-10)
+
+### Documentation
+
+* Add badges to README ([`739f1a5`](https://github.com/agelito/eve-smarterbombing/commit/739f1a5c883771bf825fd6b209556b0f0bf05196))
+
 ## v0.2.0 (2023-06-10)
 
 ### Feature
