@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2023-06-10)
+
+### Feature
+
+* Separate aggregators and squad support ([#1](https://github.com/agelito/eve-smarterbombing/issues/1)) ([`0642136`](https://github.com/agelito/eve-smarterbombing/commit/06421360adfb1e21fa78c0f78912b774005939a3))
+
 ## v0.1.5 (2023-06-06)
 
 ### Documentation
