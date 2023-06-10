@@ -1,34 +1,60 @@
 """User interface"""
 import gradio as gr
 
-from smarterbombing.app_live import AppLive
-from smarterbombing.app_offline import AppOffline
-from smarterbombing.configuration import load_configuration
-from smarterbombing.webui.ui_configuration import render_configuration
-from smarterbombing.webui.ui_live import render_live
-from smarterbombing.webui.ui_offline_analysis import render_offline_analysis
-
-CONFIGURATION_PATH = 'configuration.json'
+from smarterbombing import configuration
+from smarterbombing.webui.ui_squads import render_squads
 
 def run_webui(port: int = 42069):
-    """Run web interface"""
-    configuration = load_configuration(CONFIGURATION_PATH)
+    """
+    Run web interface
 
-    app_offline = AppOffline(configuration)
-    app_live = AppLive(configuration)
-    app_live.open_logs()
+    :param port: which port to listen to
 
-    with gr.Blocks(title="Smarterbombing") as sb_ui:
-        with gr.Tab('Live'):
-            render_live(sb_ui, app_live)
+    """
+    config = configuration.load(create_if_missing=True)
 
-        with gr.Tab('Offline Analysis'):
-            render_offline_analysis(app_offline, configuration)
+    custom_css = """
+    .character_container {
+        padding: 8px;
+        line-height: 32px;
+    }
+    .character_label {
+        background-color: #6e00ff;
+        border-radius: 6px;
+        padding: 4px 8px 4px 8px;
+        margin: 2px;
+    }
 
-        with gr.Tab('Configuration'):
-            render_configuration(configuration, CONFIGURATION_PATH)
+    h4.scs {
+        margin-top: 8px !important;
+    }
 
-    sb_ui.queue()
-    sb_ui.launch(show_api=False, server_port=port)
+    table.scs {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-    app_live.close_logs()
+    table.scs tr {
+        border-bottom: 1px dotted black;
+    }
+
+    table.scs th {
+        text-align: left !important;
+    }
+
+    table.scs td {
+        text-align: right !important;
+    }
+
+    meter.scs {
+        width: 100%;
+        height: 32px;
+    }
+    """
+
+    with gr.Blocks(title="Smarterbombing", css=custom_css) as sb_ui:
+        render_squads(sb_ui, config)
+
+        sb_ui.queue()
+        sb_ui.launch(show_api=False, server_port=port)
