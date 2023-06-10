@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2023-06-10)
+
+### Feature
+
+* Bundle with pyinstaller ([#2](https://github.com/agelito/eve-smarterbombing/issues/2)) ([`28c58c4`](https://github.com/agelito/eve-smarterbombing/commit/28c58c40acbbeb6abc3744bbddbd0b8ae67287eb))
+
 ## v0.2.1 (2023-06-10)
 
 ### Documentation
