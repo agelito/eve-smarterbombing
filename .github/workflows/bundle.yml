@@ -1,6 +1,6 @@
 name: bundle
 
-on: release
+on: [release]
 
 jobs:
     bundle:
