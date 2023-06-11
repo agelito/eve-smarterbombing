@@ -38,6 +38,7 @@ def create_default() -> dict:
     configuration['live_graph_minutes'] = 5
     configuration['site_boundary_minimum_seconds'] = 20
     configuration['ignore_list'] = ['Heavy Missile', 'Light Missile']
+    configuration['wider_graphs'] = True 
 
     return configuration
 
@@ -139,3 +140,15 @@ def create_squad(configuration: dict, squad_name: str):
 
     squads = configuration.get('squads', [])
     squads.append(squad)
+
+def get_wider_graphs(configuration: dict):
+    """
+    Get wider graphs option.
+
+    :param configuration: configuration
+    
+    :returns: True if wider graphs is enabled
+
+    """
+
+    return configuration.get('wider_graphs', True)

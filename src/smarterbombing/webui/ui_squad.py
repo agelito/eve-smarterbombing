@@ -24,17 +24,23 @@ def _reinitialize_readers(app_squad: Squad):
     app_squad.initialize_readers()
     return app_squad.get_open_files()
 
-def _render_squad_graphs():
+def _render_squad_graphs(config: dict):
+
+    if configuration.get_wider_graphs(config):
+        graph_width = 530
+    else:
+        graph_width = None
+
     with gr.Row(variant='compact'):
         dps_out_h = gr.LinePlot(
-                x_title='Time',
-                x='timestamp',
-                y_title='DPS',
-                y='damage',
-                color='character',
-                title='Outgoing Damage',
-                interactive=False,
-                width=530)
+            x_title='Time',
+            x='timestamp',
+            y_title='DPS',
+            y='damage',
+            color='character',
+            title='Outgoing Damage',
+            interactive=False,
+            width=graph_width)
 
         dps_in_h = gr.LinePlot(
             x_title='Time',
@@ -44,7 +50,7 @@ def _render_squad_graphs():
             color='character',
             title='Incoming Damage',
             interactive=False,
-            width=530)
+            width=graph_width)
 
     with gr.Row(variant='compact'):
         with gr.Column(variant='compact'):
