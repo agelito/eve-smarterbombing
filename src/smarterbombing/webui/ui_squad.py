@@ -25,11 +25,7 @@ def _reinitialize_readers(app_squad: Squad):
     return app_squad.get_open_files()
 
 def _render_squad_graphs(config: dict):
-
-    if configuration.get_wider_graphs(config):
-        graph_width = 530
-    else:
-        graph_width = None
+    graph_width = configuration.get_graph_width(config)
 
     with gr.Row(variant='compact'):
         dps_out_h = gr.LinePlot(
