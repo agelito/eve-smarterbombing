@@ -160,12 +160,28 @@ class SiteStatisticsAggregator(Aggregator):
             'hits': site_hits,
         })
 
-        result = result.combine_first(site_downtime).fillna(timedelta(0))
+        result = result.combine_first(site_downtime)
+
+        result = result.fillna({
+            'downtime': timedelta(0),
+            'duration': timedelta(0),
+            'effective_duration': timedelta(0),
+            'damage': 0,
+            'hits': 0, 
+        })
 
         self.history = pd.concat([self.history, result.iloc[:-1]], ignore_index=True)
         self.current = result.iloc[-1:]
 
         if len(self.history.index) > 0:
-            self.compound = self._compound_site_statistics(pd.concat([self.history, self.current]))
+            try:
+                data = pd.concat([self.history, self.current])
+                self.compound = self._compound_site_statistics(data)
+            except TypeError as err:
+                print('-'*32)
+                print(err)
+                print(data)
+                data.to_csv('dump.csv')
+                print('-'*32)
 
         return result
