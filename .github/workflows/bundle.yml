@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Bundle
         run: |
-          source $VENV
+          poetry shell
           pyinstaller --collect-data gradio_client --collect-data gradio --copy-metadata smarterbombing --noconfirm -F -n smarterbombing -i res/sb-icon.ico src/smarterbombing/__main__.py
 
       - uses: actions/upload-artifact@v3
