@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2023-06-11)
+
+### Feature
+
+* Add configuration option for wider graphs ([`f795c8d`](https://github.com/agelito/eve-smarterbombing/commit/f795c8d5b92fc07b23e441cf9c9d4003c06141ab))
+
+### Fix
+
+* Add missing config parameter ([`644617f`](https://github.com/agelito/eve-smarterbombing/commit/644617f0e4be3bc488f0d404c88ff671d1240072))
+
 ## v0.3.11 (2023-06-11)
 
 
