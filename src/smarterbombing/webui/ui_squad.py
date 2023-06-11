@@ -123,6 +123,6 @@ def render_squad(sb_ui: gr.Blocks, config: dict, squad: dict):
 
     with gr.Tab(squad_name):
         _render_squad_configuration(config, app_squad, squad)
-        graphs = _render_squad_graphs()
+        graphs = _render_squad_graphs(config)
 
     sb_ui.load(lambda: _update_aggregators(app_squad), every=1, outputs=graphs)
