@@ -114,7 +114,7 @@ jobs:
       - name: Build Bundle
         run: |
           source $VENV
-          pyinstaller --hidden-import gradio_client --collect-data gradio_client --hidden-import gradio --collect-data gradio --noconfirm -F -n smarterbombing -i .\res\sb-icon.ico .\src\smarterbombing\__main__.py
+          pyinstaller --hidden-import gradio_client --collect-data gradio_client --hidden-import gradio --collect-data gradio --noconfirm -F -n smarterbombing -i res/sb-icon.ico src/smarterbombing/__main__.py
 
       - name: Upload bundle
         uses: actions/upload-artifact@v3
