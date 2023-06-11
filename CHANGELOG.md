@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.1 (2023-06-11)
+
+### Fix
+
+* Compound statistics sometimes creating error due to invalid data ([`4b38e61`](https://github.com/agelito/eve-smarterbombing/commit/4b38e61b16f19bbcde0759027eec1ca14f9b7584))
+
 ## v0.5.0 (2023-06-11)
 
 ### Feature
