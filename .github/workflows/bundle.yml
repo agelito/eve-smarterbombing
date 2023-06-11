@@ -1,0 +1,43 @@
+name: bundle
+
+on: release
+
+jobs:
+    bundle:
+        defaults:
+            run:
+                shell: bash
+
+        runs-on: windows-latest
+
+        steps:
+            - name: Set up Python 3.8
+              uses: actions/setup-python@v2
+              with:
+                python-version: 3.8
+
+            - name: Check-out repository
+              uses: actions/checkout@v2
+              with:
+                fetch-depth: 0
+
+            - name: Install poetry
+              uses: snok/install-poetry@v1
+              with:
+                virtualenvs-create: true
+                virtualenvs-in-project: true
+
+            - name: Install package
+              run: poetry install --no-interaction --no-root
+
+            - name: Build Bundle
+              run: |
+                source $VENV
+                pyinstaller --hidden-import gradio_client --collect-data gradio_client --hidden-import gradio --collect-data gradio --noconfirm -F -n smarterbombing -i res/sb-icon.ico src/smarterbombing/__main__.py
+
+            - name: Release binary
+              uses: JasonEtco/upload-to-release@master
+              with:
+                args: dist/smarterbombing.exe application/vnd.microsoft.portable-executable
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
