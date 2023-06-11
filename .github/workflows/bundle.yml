@@ -37,9 +37,26 @@ jobs:
           source $VENV
           pyinstaller --hidden-import gradio_client --collect-data gradio_client --hidden-import gradio --collect-data gradio --noconfirm -F -n smarterbombing -i res/sb-icon.ico src/smarterbombing/__main__.py
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: smarterbombing.exe
+          path: dist/smarterbombing.exe
+          
+  release:
+    needs: bundle
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v3
+        with:
+          name: smarterbombing.exe
+          
       - name: Release binary
         uses: JasonEtco/upload-to-release@master
         with:
-          args: dist/smarterbombing.exe application/vnd.microsoft.portable-executable
+          args: smarterbombing.exe application/vnd.microsoft.portable-executable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    
