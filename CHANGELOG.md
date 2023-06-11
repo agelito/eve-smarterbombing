@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-06-11)
+
+### Feature
+
+* Allow configuring width of graph ([`47415a9`](https://github.com/agelito/eve-smarterbombing/commit/47415a987de1505773c860fc658dc5e8fbbcf21a))
+
 ## v0.4.0 (2023-06-11)
 
 ### Feature
