@@ -54,7 +54,7 @@ jobs:
 
       - name: PSR Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT }}
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
